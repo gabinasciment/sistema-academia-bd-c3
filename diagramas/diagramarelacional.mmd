@@ -1,0 +1,39 @@
+---
+id: 2b179050-cd0c-4a7d-a6ca-17071eb3fb87
+---
+erDiagram
+    ALUNO ||--o{ TREINO : possui
+    INSTRUTOR ||--o{ TREINO : orienta
+    ALUNO ||--o{ FREQUENCIA : registra
+
+    
+    ALUNO {
+        number id_aluno PK "NOT NULL"
+        varchar2(100) nome_aluno "NOT NULL"
+        varchar2(64)  email_aluno  "NOT NULL"
+        varchar2(20) telefone_aluno "NOT NULL"
+        date data_nascimento "NOT NULL"
+        varchar2(10) genero "NOT NULL" 
+    }
+
+    INSTRUTOR {
+        number id_instrutor PK "NOT NULL"
+        varchar2(100) nome_instrutor "NOT NULL"
+        varchar2(64)  email_instrutor  "NOT NULL"
+        varchar2(20) telefone_instrutor "NOT NULL"
+    }
+
+    TREINO {
+        number id_treino PK "NOT NULL"
+        number id_aluno FK "NOT NULL"
+        number id_instrutor FK "NOT NULL"
+        varchar2(100) nome_treino "NOT NULL"
+        varchar2(200) objetivo "NOT NULL"
+        date data_criacao "NOT NULL"
+    }
+
+    FREQUENCIA {
+        number id_frequencia PK "NOT NULL"
+        number id_aluno FK "NOT NULL"
+        date data_hora_entrada "NOT NULL"
+    }
