@@ -33,12 +33,12 @@ class ControllerAluno:
             return None
 
         return (
-            documento.get("ID_ALUNO"),
-            documento.get("NOME_ALUNO"),
-            documento.get("EMAIL_ALUNO"),
-            documento.get("TELEFONE_ALUNO"),
-            documento.get("DATA_NASCIMENTO"),
-            documento.get("GENERO")
+            documento.get("id_aluno"),
+            documento.get("nome_aluno"),
+            documento.get("email_aluno"),
+            documento.get("telefone_aluno"),
+            documento.get("data_nascimento"),
+            documento.get("genero")
         )
 
     def inserir(self, nome, email, telefone,
@@ -50,7 +50,7 @@ class ControllerAluno:
 
         try:
             banco = mongo.conectar()
-            colecao = banco["ALUNO"]
+            colecao = banco["aluno"]
 
             # Evita cadastrar e-mails repetidos
             if self.existe_email(email):
@@ -60,23 +60,23 @@ class ControllerAluno:
 
             # Busca o maior ID para gerar o próximo
             ultimo_aluno = colecao.find_one(
-                sort=[("ID_ALUNO", -1)]
+                sort=[("id_aluno", -1)]
             )
 
             novo_id = (
-                int(ultimo_aluno["ID_ALUNO"]) + 1
+                int(ultimo_aluno["id_aluno"]) + 1
                 if ultimo_aluno else 1
             )
 
             documento = {
-                "ID_ALUNO": novo_id,
-                "NOME_ALUNO": nome.strip(),
-                "EMAIL_ALUNO": email.strip(),
-                "TELEFONE_ALUNO": telefone.strip(),
-                "DATA_NASCIMENTO": self._converter_data(
+                "id_aluno": novo_id,
+                "nome_aluno": nome.strip(),
+                "email_aluno": email.strip(),
+                "telefone_aluno": telefone.strip(),
+                "data_nascimento": self._converter_data(
                     data_nascimento
                 ),
-                "GENERO": genero.strip()
+                "genero": genero.strip()
             }
 
             colecao.insert_one(documento)
@@ -95,7 +95,7 @@ class ControllerAluno:
 
         try:
             banco = mongo.conectar()
-            colecao = banco["ALUNO"]
+            colecao = banco["aluno"]
 
             if self.existe_email(email, ignorar_id=id_aluno):
                 raise ValueError(
@@ -103,17 +103,17 @@ class ControllerAluno:
                 )
 
             novos_dados = {
-                "NOME_ALUNO": nome.strip(),
-                "EMAIL_ALUNO": email.strip(),
-                "TELEFONE_ALUNO": telefone.strip(),
-                "DATA_NASCIMENTO": self._converter_data(
+                "nome_aluno": nome.strip(),
+                "email_aluno": email.strip(),
+                "telefone_aluno": telefone.strip(),
+                "data_nascimento": self._converter_data(
                     data_nascimento
                 ),
-                "GENERO": genero.strip()
+                "genero": genero.strip()
             }
 
             resultado = colecao.update_one(
-                {"ID_ALUNO": int(id_aluno)},
+                {"id_aluno": int(id_aluno)},
                 {"$set": novos_dados}
             )
 
@@ -130,21 +130,21 @@ class ControllerAluno:
 
         try:
             banco = mongo.conectar()
-            colecao = banco["ALUNO"]
+            colecao = banco["aluno"]
 
-            treinos = banco["TREINO"].count_documents(
-                {"ID_ALUNO": id_aluno}
+            treinos = banco["treino"].count_documents(
+                {"id_aluno": id_aluno}
             )
 
-            frequencias = banco["FREQUENCIA"].count_documents(
-                {"ID_ALUNO": id_aluno}
+            frequencias = banco["frequencia"].count_documents(
+                {"id_aluno": id_aluno}
             )
 
             if treinos > 0 or frequencias > 0:
                 return False
 
             resultado = colecao.delete_one(
-                {"ID_ALUNO": id_aluno}
+                {"id_aluno": id_aluno}
             )
 
             return resultado.deleted_count > 0
@@ -159,8 +159,8 @@ class ControllerAluno:
         try:
             banco = mongo.conectar()
 
-            documento = banco["ALUNO"].find_one(
-                {"ID_ALUNO": int(id_aluno)}
+            documento = banco["aluno"].find_one(
+                {"id_aluno": int(id_aluno)}
             )
 
             return self._documento_para_tupla(documento)
@@ -175,8 +175,8 @@ class ControllerAluno:
         try:
             banco = mongo.conectar()
 
-            documentos = banco["ALUNO"].find().sort(
-                "NOME_ALUNO", 1
+            documentos = banco["aluno"].find().sort(
+                "nome_aluno", 1
             )
 
             return [
@@ -209,10 +209,10 @@ class ControllerAluno:
 
         try:
             banco = mongo.conectar()
-            colecao = banco["ALUNO"]
+            colecao = banco["aluno"]
 
             filtro = {
-                "EMAIL_ALUNO": {
+                "email_aluno": {
                     "$regex": "^" + __import__("re").escape(
                         email.strip()
                     ) + "$",
@@ -221,7 +221,7 @@ class ControllerAluno:
             }
 
             if ignorar_id is not None:
-                filtro["ID_ALUNO"] = {
+                filtro["id_aluno"] = {
                     "$ne": int(ignorar_id)
                 }
 
@@ -238,12 +238,12 @@ class ControllerAluno:
             banco = mongo.conectar()
             id_aluno = int(id_aluno)
 
-            treinos = banco["TREINO"].count_documents(
-                {"ID_ALUNO": id_aluno}
+            treinos = banco["treino"].count_documents(
+                {"id_aluno": id_aluno}
             )
 
-            frequencias = banco["FREQUENCIA"].count_documents(
-                {"ID_ALUNO": id_aluno}
+            frequencias = banco["frequencia"].count_documents(
+                {"id_aluno": id_aluno}
             )
 
             return treinos, frequencias
@@ -260,25 +260,25 @@ class ControllerAluno:
             id_aluno = int(id_aluno)
 
             # Confirma se o aluno existe
-            aluno = banco["ALUNO"].find_one(
-                {"ID_ALUNO": id_aluno}
+            aluno = banco["aluno"].find_one(
+                {"id_aluno": id_aluno}
             )
 
             if aluno is None:
                 return False
 
             # Exclui registros relacionados
-            banco["TREINO"].delete_many(
-                {"ID_ALUNO": id_aluno}
+            banco["treino"].delete_many(
+                {"id_aluno": id_aluno}
             )
 
-            banco["FREQUENCIA"].delete_many(
-                {"ID_ALUNO": id_aluno}
+            banco["frequencia"].delete_many(
+                {"id_aluno": id_aluno}
             )
 
             # Exclui o aluno
-            resultado = banco["ALUNO"].delete_one(
-                {"ID_ALUNO": id_aluno}
+            resultado = banco["aluno"].delete_one(
+                {"id_aluno": id_aluno}
             )
 
             return resultado.deleted_count > 0

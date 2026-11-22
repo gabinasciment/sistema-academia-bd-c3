@@ -23,22 +23,22 @@ class ControllerTreino:
             return None
 
         return (
-            documento.get("ID_TREINO"),
-            documento.get("ID_ALUNO"),
-            documento.get("ID_INSTRUTOR"),
-            documento.get("NOME_TREINO"),
-            documento.get("OBJETIVO"),
-            documento.get("DATA_CRIACAO")
+            documento.get("id_treino"),
+            documento.get("id_aluno"),
+            documento.get("id_instrutor"),
+            documento.get("nome_treino"),
+            documento.get("objetivo"),
+            documento.get("data_criacao")
         )
 
     @staticmethod
     def _validar_relacionamentos(banco, id_aluno, id_instrutor):
         """Verifica se o aluno e o instrutor existem."""
-        if banco["ALUNO"].find_one({"ID_ALUNO": id_aluno}) is None:
+        if banco["aluno"].find_one({"id_aluno": id_aluno}) is None:
             raise ValueError("Aluno não encontrado.")
 
-        if banco["INSTRUTOR"].find_one(
-            {"ID_INSTRUTOR": id_instrutor}
+        if banco["instrutor"].find_one(
+            {"id_instrutor": id_instrutor}
         ) is None:
             raise ValueError("Instrutor não encontrado.")
 
@@ -53,28 +53,28 @@ class ControllerTreino:
 
         try:
             banco = mongo.conectar()
-            colecao = banco["TREINO"]
+            colecao = banco["treino"]
 
             self._validar_relacionamentos(
                 banco, id_aluno, id_instrutor
             )
 
             ultimo = colecao.find_one(
-                sort=[("ID_TREINO", -1)]
+                sort=[("id_treino", -1)]
             )
 
             novo_id = (
-                int(ultimo["ID_TREINO"]) + 1
+                int(ultimo["id_treino"]) + 1
                 if ultimo else 1
             )
 
             documento = {
-                "ID_TREINO": novo_id,
-                "ID_ALUNO": id_aluno,
-                "ID_INSTRUTOR": id_instrutor,
-                "NOME_TREINO": nome_treino.strip(),
-                "OBJETIVO": objetivo.strip(),
-                "DATA_CRIACAO": datetime.now()
+                "id_treino": novo_id,
+                "id_aluno": id_aluno,
+                "id_instrutor": id_instrutor,
+                "nome_treino": nome_treino.strip(),
+                "objetivo": objetivo.strip(),
+                "data_criacao": datetime.now()
             }
 
             colecao.insert_one(documento)
@@ -103,14 +103,14 @@ class ControllerTreino:
                 banco, id_aluno, id_instrutor
             )
 
-            resultado = banco["TREINO"].update_one(
-                {"ID_TREINO": id_treino},
+            resultado = banco["treino"].update_one(
+                {"id_treino": id_treino},
                 {
                     "$set": {
-                        "ID_ALUNO": id_aluno,
-                        "ID_INSTRUTOR": id_instrutor,
-                        "NOME_TREINO": nome_treino.strip(),
-                        "OBJETIVO": objetivo.strip()
+                        "id_aluno": id_aluno,
+                        "id_instrutor": id_instrutor,
+                        "nome_treino": nome_treino.strip(),
+                        "objetivo": objetivo.strip()
                     }
                 }
             )
@@ -127,8 +127,8 @@ class ControllerTreino:
         try:
             banco = mongo.conectar()
 
-            resultado = banco["TREINO"].delete_one(
-                {"ID_TREINO": int(id_treino)}
+            resultado = banco["treino"].delete_one(
+                {"id_treino": int(id_treino)}
             )
 
             return resultado.deleted_count > 0
@@ -143,8 +143,8 @@ class ControllerTreino:
         try:
             banco = mongo.conectar()
 
-            documento = banco["TREINO"].find_one(
-                {"ID_TREINO": int(id_treino)}
+            documento = banco["treino"].find_one(
+                {"id_treino": int(id_treino)}
             )
 
             return self._documento_para_tupla(documento)
@@ -162,35 +162,35 @@ class ControllerTreino:
             pipeline = [
                 {
                     "$lookup": {
-                        "from": "ALUNO",
-                        "localField": "ID_ALUNO",
-                        "foreignField": "ID_ALUNO",
+                        "from": "aluno",
+                        "localField": "id_aluno",
+                        "foreignField": "id_aluno",
                         "as": "aluno"
                     }
                 },
                 {"$unwind": "$aluno"},
                 {
                     "$lookup": {
-                        "from": "INSTRUTOR",
-                        "localField": "ID_INSTRUTOR",
-                        "foreignField": "ID_INSTRUTOR",
+                        "from": "instrutor",
+                        "localField": "id_instrutor",
+                        "foreignField": "id_instrutor",
                         "as": "instrutor"
                     }
                 },
                 {"$unwind": "$instrutor"},
-                {"$sort": {"DATA_CRIACAO": -1}}
+                {"$sort": {"data_criacao": -1}}
             ]
 
-            documentos = banco["TREINO"].aggregate(pipeline)
+            documentos = banco["treino"].aggregate(pipeline)
 
             return [
                 (
-                    doc.get("ID_TREINO"),
-                    doc["aluno"].get("NOME_ALUNO"),
-                    doc["instrutor"].get("NOME_INSTRUTOR"),
-                    doc.get("NOME_TREINO"),
-                    doc.get("OBJETIVO"),
-                    doc.get("DATA_CRIACAO")
+                    doc.get("id_treino"),
+                    doc["aluno"].get("nome_aluno"),
+                    doc["instrutor"].get("nome_instrutor"),
+                    doc.get("nome_treino"),
+                    doc.get("objetivo"),
+                    doc.get("data_criacao")
                 )
                 for doc in documentos
             ]
@@ -211,8 +211,8 @@ class ControllerTreino:
         try:
             banco = mongo.conectar()
 
-            documento_instrutor = banco["INSTRUTOR"].find_one(
-                {"ID_INSTRUTOR": int(linha[2])}
+            documento_instrutor = banco["instrutor"].find_one(
+                {"id_instrutor": int(linha[2])}
             )
         finally:
             mongo.fechar()
@@ -225,10 +225,10 @@ class ControllerTreino:
         from model.instrutor import Instrutor
 
         instrutor = Instrutor(
-            documento_instrutor["ID_INSTRUTOR"],
-            documento_instrutor["NOME_INSTRUTOR"],
-            documento_instrutor["EMAIL_INSTRUTOR"],
-            documento_instrutor["TELEFONE_INSTRUTOR"]
+            documento_instrutor["id_instrutor"],
+            documento_instrutor["nome_instrutor"],
+            documento_instrutor["email_instrutor"],
+            documento_instrutor["telefone_instrutor"]
         )
 
         return Treino(
@@ -248,28 +248,28 @@ class ControllerTreino:
             banco = mongo.conectar()
 
             pipeline = [
-                {"$match": {"ID_ALUNO": int(id_aluno)}},
+                {"$match": {"id_aluno": int(id_aluno)}},
                 {
                     "$lookup": {
-                        "from": "INSTRUTOR",
-                        "localField": "ID_INSTRUTOR",
-                        "foreignField": "ID_INSTRUTOR",
+                        "from": "instrutor",
+                        "localField": "id_instrutor",
+                        "foreignField": "id_instrutor",
                         "as": "instrutor"
                     }
                 },
                 {"$unwind": "$instrutor"},
-                {"$sort": {"DATA_CRIACAO": -1}}
+                {"$sort": {"data_criacao": -1}}
             ]
 
-            documentos = banco["TREINO"].aggregate(pipeline)
+            documentos = banco["treino"].aggregate(pipeline)
 
             return [
                 (
-                    doc.get("ID_TREINO"),
-                    doc["instrutor"].get("NOME_INSTRUTOR"),
-                    doc.get("NOME_TREINO"),
-                    doc.get("OBJETIVO"),
-                    doc.get("DATA_CRIACAO")
+                    doc.get("id_treino"),
+                    doc["instrutor"].get("nome_instrutor"),
+                    doc.get("nome_treino"),
+                    doc.get("objetivo"),
+                    doc.get("data_criacao")
                 )
                 for doc in documentos
             ]
