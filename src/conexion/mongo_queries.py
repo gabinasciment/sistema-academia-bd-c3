@@ -40,8 +40,12 @@ class MongoQueries:
         self.db = None
 
         # O arquivo tem o formato: usuario,senha
-        with open(ARQUIVO_AUTENTICACAO, "r") as f:
-            self.user, self.passwd = f.read().strip().split(",")
+        self.user = os.environ.get("MONGO_USER")
+        self.passwd = os.environ.get("MONGO_PASSWORD")
+
+        if not self.user or not self.passwd:
+            with open(ARQUIVO_AUTENTICACAO, "r") as f:
+                self.user, self.passwd = f.read().strip().split(",")
 
     def __del__(self):
         try:
@@ -68,3 +72,11 @@ class MongoQueries:
             self.mongo_client.close()
             self.mongo_client = None
             self.db = None
+
+    def conectar(self):
+        self.connect()
+        self.mongo_client.admin.command("ping")
+        return self.db
+
+    def fechar(self):
+        self.close()
