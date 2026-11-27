@@ -1,0 +1,31 @@
+
+[
+    {
+        "$lookup": {
+            "from": "TREINO",
+            "localField": "ID_ALUNO",
+            "foreignField": "ID_ALUNO",
+            "as": "treinos"
+        }
+    },
+    {
+        "$addFields": {
+            "quantidade_treinos": {
+                "$size": "$treinos"
+            }
+        }
+    },
+    {
+        "$project": {
+            "_id": 0,
+            "ID_ALUNO": 1,
+            "aluno": "$NOME_ALUNO",
+            "quantidade_treinos": 1
+        }
+    },
+    {
+        "$sort": {
+            "aluno": 1
+        }
+    }
+]
