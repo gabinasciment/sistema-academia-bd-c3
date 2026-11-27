@@ -1,0 +1,41 @@
+
+[
+    {
+        "$lookup": {
+            "from": "ALUNO",
+            "localField": "ID_ALUNO",
+            "foreignField": "ID_ALUNO",
+            "as": "aluno"
+        }
+    },
+    {
+        "$unwind": "$aluno"
+    },
+    {
+        "$lookup": {
+            "from": "INSTRUTOR",
+            "localField": "ID_INSTRUTOR",
+            "foreignField": "ID_INSTRUTOR",
+            "as": "instrutor"
+        }
+    },
+    {
+        "$unwind": "$instrutor"
+    },
+    {
+        "$project": {
+            "_id": 0,
+            "ID_TREINO": 1,
+            "treino": "$NOME_TREINO",
+            "OBJETIVO": 1,
+            "aluno": "$aluno.NOME_ALUNO",
+            "instrutor": "$instrutor.NOME_INSTRUTOR",
+            "DATA_CRIACAO": 1
+        }
+    },
+    {
+        "$sort": {
+            "DATA_CRIACAO": -1
+        }
+    }
+]
